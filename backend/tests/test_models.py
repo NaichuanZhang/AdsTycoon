@@ -71,6 +71,17 @@ class TestSimulationModel:
         sims = db_session.query(Simulation).all()
         assert len(sims) == 2
 
+    def test_simulation_default_num_rounds(self, db_session: Session):
+        sim = _make_simulation(db_session)
+        assert sim.num_rounds == 3
+
+    def test_simulation_custom_num_rounds(self, db_session: Session):
+        sim = Simulation(scenario="test", num_rounds=10)
+        db_session.add(sim)
+        db_session.commit()
+        db_session.refresh(sim)
+        assert sim.num_rounds == 10
+
 
 class TestConsumerModel:
     def test_create_consumer(self, db_session: Session):

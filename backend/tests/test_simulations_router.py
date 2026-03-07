@@ -37,9 +37,21 @@ class TestCreateSimulation:
         assert data["website_count"] == 0
         assert data["campaign_count"] == 0
 
+    def test_create_default_num_rounds(self, client, db_session):
+        resp = client.post("/api/simulations", json={"scenario": "test"})
+        assert resp.status_code == 201
+        assert resp.json()["num_rounds"] == 3
+
+    def test_create_with_num_rounds(self, client, db_session):
+        resp = client.post("/api/simulations", json={
+            "scenario": "test", "num_rounds": 10,
+        })
+        assert resp.status_code == 201
+        assert resp.json()["num_rounds"] == 10
+
     @patch("backend.routers.simulations.run_seeder")
     def test_seed_simulation(self, mock_seeder, client, db_session):
-        mock_seeder.side_effect = lambda simulation_id, scenario, num_consumers, num_websites, num_campaigns, db_session: _seed_manually(db_session, simulation_id)
+        mock_seeder.side_effect = lambda simulation_id, scenario, num_consumers, num_websites, num_campaigns, num_rounds, db_session: _seed_manually(db_session, simulation_id)
 
         sim = Simulation(scenario="test seed", status="created")
         db_session.add(sim)

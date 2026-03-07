@@ -15,6 +15,7 @@ from backend.agents.campaign import SYSTEM_PROMPT as CAMPAIGN_SYSTEM_PROMPT
 from backend.agents.consumer import SYSTEM_PROMPT as CONSUMER_SYSTEM_PROMPT
 from backend.agents.insights import SYSTEM_PROMPT as INSIGHTS_SYSTEM_PROMPT
 from backend.agents.seeder import SYSTEM_PROMPT as SEEDER_SYSTEM_PROMPT
+from backend.agents.seeder import build_seeder_prompt
 from backend.database import SessionLocal
 from backend.models import Auction, Campaign, Consumer, Simulation, Website
 from backend.tools.campaign_tools import get_campaign, submit_bid
@@ -99,12 +100,9 @@ async def stream_seed(sim_id: str):
             callback_handler=None,
         )
 
-        prompt = (
-            f"Simulation ID: {sim.id}\n"
-            f"Scenario: {sim.scenario}\n"
-            f"Generate exactly {sim.num_consumers} consumers, {sim.num_websites} websites, "
-            f"and {sim.num_campaigns} campaigns.\n"
-            f"Call the tools now."
+        prompt = build_seeder_prompt(
+            sim.id, sim.scenario, sim.num_consumers, sim.num_websites,
+            sim.num_campaigns, sim.num_rounds,
         )
 
         async def generate():
@@ -152,7 +150,7 @@ def _website_context_text(website: Website) -> str:
 
 
 @router.get("/run")
-async def stream_run(sim_id: str, rounds: int = Query(default=3, ge=1, le=50)):
+async def stream_run(sim_id: str, rounds: int = Query(default=None, ge=1, le=50)):
     """SSE endpoint: streams the full auction pipeline round by round."""
     db = SessionLocal()
     try:
@@ -167,12 +165,14 @@ async def stream_run(sim_id: str, rounds: int = Query(default=3, ge=1, le=50)):
         if not consumers or not websites or not campaigns:
             raise HTTPException(status_code=400, detail="Simulation must be seeded first")
 
+        effective_rounds = rounds if rounds is not None else sim.num_rounds
+
         async def generate():
             try:
                 sim.status = "running"
                 db.commit()
 
-                for round_num in range(1, rounds + 1):
+                for round_num in range(1, effective_rounds + 1):
                     consumer = random.choice(consumers)
                     website = random.choice(websites)
 
@@ -187,7 +187,7 @@ async def stream_run(sim_id: str, rounds: int = Query(default=3, ge=1, le=50)):
 
                     yield _sse("auction_start", {
                         "round": round_num,
-                        "total_rounds": rounds,
+                        "total_rounds": effective_rounds,
                         "auction_id": auction.id,
                         "consumer": consumer.name,
                         "website": website.name,
@@ -277,7 +277,7 @@ async def stream_run(sim_id: str, rounds: int = Query(default=3, ge=1, le=50)):
 
                 sim.status = "completed"
                 db.commit()
-                yield _sse("done", {"message": f"Completed {rounds} auction rounds"})
+                yield _sse("done", {"message": f"Completed {effective_rounds} auction rounds"})
 
             except Exception as e:
                 logger.exception("Auction stream error")

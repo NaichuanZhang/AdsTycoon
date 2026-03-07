@@ -1,22 +1,22 @@
 /**
  * Main app controller — view switching and data flow.
  */
-import { $, el } from './utils.js';
-import { api, connectSSE } from './api.js';
-import { ScenarioInput } from './components/scenario-input.js';
-import { AgentStream } from './components/agent-stream.js';
-import { Dashboard } from './components/dashboard.js';
+import { $, el } from "./utils.js";
+import { api, connectSSE } from "./api.js";
+import { ScenarioInput } from "./components/scenario-input.js";
+import { AgentStream } from "./components/agent-stream.js";
+import { Dashboard } from "./components/dashboard.js";
 
 class App {
   constructor() {
-    this.root = $('#app-root');
-    this.newSimBtn = $('#btn-new-sim');
+    this.root = $("#app-root");
+    this.newSimBtn = $("#btn-new-sim");
     this.currentView = null;
     this.simId = null;
     this.scenario = null;
     this.sseConnection = null;
 
-    this.newSimBtn.addEventListener('click', () => this.showLaunchView());
+    this.newSimBtn.addEventListener("click", () => this.showLaunchView());
     this.showLaunchView();
   }
 
@@ -29,13 +29,13 @@ class App {
       this.currentView.destroy();
       this.currentView = null;
     }
-    this.root.innerHTML = '';
+    this.root.innerHTML = "";
   }
 
   // --- View 1: Launch ---
   showLaunchView() {
     this.clearView();
-    this.newSimBtn.style.display = 'none';
+    this.newSimBtn.style.display = "none";
 
     const view = new ScenarioInput({
       onLaunch: (config) => this.launchSimulation(config),
@@ -44,11 +44,24 @@ class App {
     this.currentView = view;
   }
 
-  async launchSimulation({ scenario, numConsumers, numWebsites, numCampaigns }) {
+  async launchSimulation({
+    scenario,
+    numConsumers,
+    numWebsites,
+    numCampaigns,
+    numRounds,
+  }) {
     try {
-      const sim = await api.createSimulation(scenario, numConsumers, numWebsites, numCampaigns);
+      const sim = await api.createSimulation(
+        scenario,
+        numConsumers,
+        numWebsites,
+        numCampaigns,
+        numRounds,
+      );
       this.simId = sim.id;
       this.scenario = scenario;
+      this.numRounds = sim.num_rounds;
       this.showStreamView();
       this.startSeeding();
     } catch (err) {
@@ -59,7 +72,7 @@ class App {
   // --- View 2: Agent Stream ---
   showStreamView() {
     this.clearView();
-    this.newSimBtn.style.display = 'block';
+    this.newSimBtn.style.display = "block";
 
     const view = new AgentStream({
       onRunAuctions: (rounds) => this.startAuctions(rounds),
@@ -71,49 +84,49 @@ class App {
 
   startSeeding() {
     const view = this.currentView;
-    view.setStatus('Seeding simulation...', 'active');
+    view.setStatus("Seeding simulation...", "active");
 
     this.sseConnection = connectSSE(
       `/simulations/${this.simId}/stream/seed`,
       (event) => {
         view.handleEvent(event);
-        if (event.type === 'done') {
+        if (event.type === "done") {
           if (this.sseConnection) this.sseConnection.close();
           this.sseConnection = null;
-          view.showSeedComplete();
+          view.showSeedComplete(this.numRounds);
         }
-        if (event.type === 'error') {
+        if (event.type === "error") {
           if (this.sseConnection) this.sseConnection.close();
           this.sseConnection = null;
         }
       },
       (err) => {
-        view.setStatus('Connection lost', 'error');
-      }
+        view.setStatus("Connection lost", "error");
+      },
     );
   }
 
   startAuctions(rounds) {
     const view = this.currentView;
-    view.setStatus(`Running ${rounds} auction rounds...`, 'active');
+    view.setStatus(`Running ${rounds} auction rounds...`, "active");
 
     this.sseConnection = connectSSE(
       `/simulations/${this.simId}/stream/run?rounds=${rounds}`,
       (event) => {
         view.handleEvent(event);
-        if (event.type === 'done') {
+        if (event.type === "done") {
           if (this.sseConnection) this.sseConnection.close();
           this.sseConnection = null;
           view.showRunComplete();
         }
-        if (event.type === 'error') {
+        if (event.type === "error") {
           if (this.sseConnection) this.sseConnection.close();
           this.sseConnection = null;
         }
       },
       (err) => {
-        view.setStatus('Connection lost', 'error');
-      }
+        view.setStatus("Connection lost", "error");
+      },
     );
   }
 
@@ -122,7 +135,7 @@ class App {
     try {
       const data = await api.getDashboard(this.simId);
       this.clearView();
-      this.newSimBtn.style.display = 'block';
+      this.newSimBtn.style.display = "block";
 
       const view = new Dashboard({
         simId: this.simId,

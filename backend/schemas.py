@@ -11,6 +11,7 @@ class SimulationCreate(BaseModel):
     num_consumers: int = Field(default=20, ge=1, le=100)
     num_websites: int = Field(default=10, ge=1, le=50)
     num_campaigns: int = Field(default=4, ge=1, le=20)
+    num_rounds: int = Field(default=3, ge=1, le=50)
 
 
 class SimulationResponse(BaseModel):
@@ -18,6 +19,7 @@ class SimulationResponse(BaseModel):
     scenario: str
     status: str
     created_at: datetime
+    num_rounds: int = 3
     consumer_count: int = 0
     website_count: int = 0
     campaign_count: int = 0

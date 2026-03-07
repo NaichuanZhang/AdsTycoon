@@ -6,6 +6,7 @@ from backend.schemas import (
     ConsumerResponse,
     RunRequest,
     SimulationCreate,
+    SimulationResponse,
 )
 
 
@@ -38,6 +39,22 @@ class TestSimulationCreate:
         with pytest.raises(ValidationError):
             SimulationCreate(scenario="test", num_consumers=200)
 
+    def test_default_num_rounds(self):
+        s = SimulationCreate(scenario="test")
+        assert s.num_rounds == 3
+
+    def test_custom_num_rounds(self):
+        s = SimulationCreate(scenario="test", num_rounds=10)
+        assert s.num_rounds == 10
+
+    def test_zero_rounds_rejected(self):
+        with pytest.raises(ValidationError):
+            SimulationCreate(scenario="test", num_rounds=0)
+
+    def test_over_50_rounds_rejected(self):
+        with pytest.raises(ValidationError):
+            SimulationCreate(scenario="test", num_rounds=51)
+
 
 class TestRunRequest:
     def test_default_rounds(self):
@@ -66,6 +83,22 @@ class TestConsumerResponse:
             location="NYC",
         )
         assert c.name == "Alice"
+
+
+class TestSimulationResponse:
+    def test_response_includes_num_rounds(self):
+        resp = SimulationResponse(
+            id="abc", scenario="test", status="created",
+            created_at="2026-01-01T00:00:00", num_rounds=10,
+        )
+        assert resp.num_rounds == 10
+
+    def test_response_default_num_rounds(self):
+        resp = SimulationResponse(
+            id="abc", scenario="test", status="created",
+            created_at="2026-01-01T00:00:00",
+        )
+        assert resp.num_rounds == 3
 
 
 class TestCampaignResponse:

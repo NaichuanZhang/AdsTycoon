@@ -24,6 +24,7 @@ class Simulation(Base):
     num_consumers: Mapped[int] = mapped_column(Integer, default=20)
     num_websites: Mapped[int] = mapped_column(Integer, default=10)
     num_campaigns: Mapped[int] = mapped_column(Integer, default=4)
+    num_rounds: Mapped[int] = mapped_column(Integer, default=3)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
 
     consumers: Mapped[list["Consumer"]] = relationship(back_populates="simulation")

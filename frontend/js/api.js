@@ -2,12 +2,12 @@
  * API client — fetch + EventSource helpers.
  */
 
-const BASE = '/api';
+const BASE = "/api";
 
 async function request(method, path, body = null) {
   const opts = {
     method,
-    headers: { 'Content-Type': 'application/json' },
+    headers: { "Content-Type": "application/json" },
   };
   if (body) opts.body = JSON.stringify(body);
 
@@ -20,33 +20,40 @@ async function request(method, path, body = null) {
 }
 
 export const api = {
-  createSimulation(scenario, numConsumers, numWebsites, numCampaigns) {
-    return request('POST', '/simulations', {
+  createSimulation(
+    scenario,
+    numConsumers,
+    numWebsites,
+    numCampaigns,
+    numRounds,
+  ) {
+    return request("POST", "/simulations", {
       scenario,
       num_consumers: numConsumers,
       num_websites: numWebsites,
       num_campaigns: numCampaigns,
+      num_rounds: numRounds,
     });
   },
 
   getSimulation(simId) {
-    return request('GET', `/simulations/${simId}`);
+    return request("GET", `/simulations/${simId}`);
   },
 
   listSimulations() {
-    return request('GET', '/simulations');
+    return request("GET", "/simulations");
   },
 
   getCampaigns(simId) {
-    return request('GET', `/simulations/${simId}/campaigns`);
+    return request("GET", `/simulations/${simId}/campaigns`);
   },
 
   getCampaignDetail(simId, campaignId) {
-    return request('GET', `/simulations/${simId}/campaigns/${campaignId}`);
+    return request("GET", `/simulations/${simId}/campaigns/${campaignId}`);
   },
 
   getDashboard(simId) {
-    return request('GET', `/simulations/${simId}/dashboard`);
+    return request("GET", `/simulations/${simId}/dashboard`);
   },
 };
 
@@ -64,14 +71,14 @@ export function connectSSE(path, onEvent, onError) {
       const data = JSON.parse(msg.data);
       onEvent(data);
     } catch (e) {
-      console.error('SSE parse error:', e, msg.data);
+      console.error("SSE parse error:", e, msg.data);
     }
   };
 
   eventSource.onerror = (err) => {
     // EventSource auto-reconnects, but if readyState is CLOSED the stream ended
     if (eventSource.readyState === EventSource.CLOSED) {
-      if (onError) onError(new Error('Stream connection closed'));
+      if (onError) onError(new Error("Stream connection closed"));
     }
   };
 

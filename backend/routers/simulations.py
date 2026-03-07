@@ -24,6 +24,7 @@ def create_simulation(payload: SimulationCreate, db: Session = Depends(get_db)):
         num_consumers=payload.num_consumers,
         num_websites=payload.num_websites,
         num_campaigns=payload.num_campaigns,
+        num_rounds=payload.num_rounds,
     )
     db.add(sim)
     db.commit()
@@ -42,6 +43,7 @@ def seed_simulation(sim_id: str, db: Session = Depends(get_db)):
         num_consumers=sim.num_consumers,
         num_websites=sim.num_websites,
         num_campaigns=sim.num_campaigns,
+        num_rounds=sim.num_rounds,
         db_session=db,
     )
 
@@ -99,6 +101,7 @@ def _sim_to_response(sim: Simulation) -> SimulationResponse:
         scenario=sim.scenario,
         status=sim.status,
         created_at=sim.created_at,
+        num_rounds=sim.num_rounds,
         consumer_count=len(sim.consumers),
         website_count=len(sim.websites),
         campaign_count=len(sim.campaigns),
