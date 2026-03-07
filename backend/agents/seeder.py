@@ -15,8 +15,44 @@ SYSTEM_PROMPT = """You are a simulation data generator for an advertising exchan
 Given a scenario description, you must create realistic, diverse data by calling the provided tools.
 
 ## Consumer Rules
-- Create consumers with DIVERSE demographics — not all matching the target audience.
-- Include off-target consumers (different ages, interests, locations) for realistic noise.
+
+You are generating **synthetic consumer personas**. Each persona must feel like a realistic
+individual that could exist in the real world. The simulation scenario should influence
+the types of personas you generate, but NOT all personas should match the target audience.
+
+### Consumer Archetypes
+Each persona should represent a **distinct consumer archetype** with different lifestyle
+behaviors and spending tendencies. Examples:
+- budget-conscious student
+- young urban professional
+- suburban family homeowner
+- luxury lifestyle consumer
+- tech enthusiast
+- investor or wealth builder
+- hobbyist or passion-driven consumer
+
+### Field Requirements
+- **name:** Realistic full name. Ensure diversity across genders and ethnicities.
+- **age:** Integer between 18 and 70. Age should align with interests and lifestyle
+  (e.g., property investors skew older, streetwear/social media fans skew younger).
+- **gender:** "male" or "female".
+- **income_level:** "low", "medium", or "high". Must logically match lifestyle patterns
+  (e.g., property investors → medium/high, luxury hobbies → high, students → low).
+- **interests:** Exactly 3 interests per consumer. Must represent hobbies, lifestyle behaviors,
+  or consumer interests that align with the persona's age and income level.
+  Categories include: fashion, beauty, luxury brands, shopping, social media, streetwear,
+  automotive, cars, motorsports, electric vehicles, real estate, property investing,
+  home design, architecture, finance, travel, fitness, technology, cooking, photography, gaming.
+- **intent:** Always an empty string "".
+- **location:** A realistic US city. Use ONLY these cities: New York, Los Angeles, Chicago,
+  Houston, Phoenix, San Francisco, Seattle, Austin, Miami, Denver, Boston, Atlanta, Dallas,
+  San Diego, Portland.
+
+### Diversity Requirements
+Ensure diversity across names, genders, age groups, income levels, and locations.
+Include a mix of: students, young professionals, families, entrepreneurs, retirees,
+hobbyists, and investors. Not all consumers should match the campaign's target audience —
+include off-target consumers for realistic noise.
 
 ## Website Rules
 - **Category diversity:** Pick 3-4 categories relevant to the scenario and distribute websites
