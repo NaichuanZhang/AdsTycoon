@@ -1,0 +1,17 @@
+services:
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - bid-exchange-data:/data
+      - ~/.aws:/home/app/.aws:ro
+    environment:
+      - DATABASE_URL=sqlite:////data/bid_exchange.db
+      - AWS_REGION=${AWS_REGION:-us-east-1}
+      - AWS_PROFILE=${AWS_PROFILE:-tokenmaster}
+      - BEDROCK_MODEL_ID=${BEDROCK_MODEL_ID:-us.anthropic.claude-haiku-4-5-20251001-v1:0}
+    restart: unless-stopped
+
+volumes:
+  bid-exchange-data:
