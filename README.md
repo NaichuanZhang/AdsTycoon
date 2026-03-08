@@ -2,6 +2,8 @@
 
 > AdsGency AI Hackathon 2026 — Track 3: Autonomous Marketing Simulation
 
+**[Video Demo](https://www.youtube.com/watch?v=SknZg78uOBA)**
+
 A simulated real-time ad auction where AI consumer agents, website contexts, and campaign agents interact in a bidding loop. FastAPI acts as the exchange.
 
 ---
