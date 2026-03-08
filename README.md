@@ -1,8 +1,127 @@
-# Bid Exchange
+# AdsTycoon
 
 > AdsGency AI Hackathon 2026 — Track 3: Autonomous Marketing Simulation
 
-A simulated real-time bidding exchange where AI consumer agents, website contexts, and campaign agents interact in an auction loop. FastAPI acts as the exchange.
+A simulated real-time ad auction where AI consumer agents, website contexts, and campaign agents interact in a bidding loop. FastAPI acts as the exchange.
+
+---
+
+## Architecture
+
+```mermaid
+graph TB
+    subgraph Frontend["Frontend (Vanilla JS + SSE)"]
+        UI_Input["ScenarioInput<br/>Scenario + Config"]
+        UI_Stream["AgentStream<br/>Live Event Log"]
+        UI_Editor["CampaignEditor<br/>Edit Before Auction"]
+        UI_Dash["Dashboard<br/>Stats + Analysis"]
+        UI_Detail["CampaignDetail<br/>Insights Panel"]
+    end
+
+    subgraph Backend["Backend (FastAPI)"]
+        API_Sim["POST /api/simulations"]
+        API_Seed["SSE /stream/seed"]
+        API_Run["SSE /stream/run"]
+        API_Insights["SSE /stream/insights"]
+        API_Dash["GET /dashboard"]
+        API_Camp["PUT /campaigns/{id}"]
+    end
+
+    subgraph Agents["Strands Agents (AWS Bedrock Claude)"]
+        A_Seed["Seeder Agent"]
+        A_Camp["Campaign Agent<br/>(per campaign)"]
+        A_Consumer["Consumer Agent"]
+        A_Insight["Insights Agent"]
+    end
+
+    subgraph Tools["Agent Tools (DB Read/Write)"]
+        T_Seed["create_consumers<br/>create_websites<br/>create_campaigns"]
+        T_Camp["get_campaign<br/>submit_bid"]
+        T_Consumer["submit_feedback"]
+        T_Insight["get_campaign_stats<br/>get_campaign_auctions"]
+    end
+
+    subgraph DB["SQLite (SQLAlchemy)"]
+        Sim[(Simulation)]
+        Con[(Consumer)]
+        Web[(Website)]
+        Camp[(Campaign)]
+        Auc[(Auction)]
+        Bid[(Bid)]
+    end
+
+    %% Frontend → Backend
+    UI_Input -->|"Create Simulation"| API_Sim
+    UI_Stream -->|"EventSource"| API_Seed
+    UI_Stream -->|"EventSource"| API_Run
+    UI_Editor -->|"Update Campaign"| API_Camp
+    UI_Dash -->|"Fetch Stats"| API_Dash
+    UI_Detail -->|"EventSource"| API_Insights
+
+    %% Backend → Agents
+    API_Seed -->|"stream_async"| A_Seed
+    API_Run -->|"stream_async"| A_Camp
+    API_Run -->|"stream_async"| A_Consumer
+    API_Insights -->|"stream_async"| A_Insight
+
+    %% Agents → Tools
+    A_Seed --> T_Seed
+    A_Camp --> T_Camp
+    A_Consumer --> T_Consumer
+    A_Insight --> T_Insight
+
+    %% Tools → DB
+    T_Seed --> Con & Web & Camp
+    T_Camp --> Bid
+    T_Consumer --> Auc
+    T_Insight -.->|"read-only"| Auc & Bid
+
+    %% DB Relations
+    Sim --- Con & Web & Camp & Auc
+    Auc --- Bid
+
+    %% View flow
+    UI_Input -.->|"View 1"| UI_Stream
+    UI_Stream -.->|"After Seed"| UI_Editor
+    UI_Editor -.->|"After Auction"| UI_Dash
+    UI_Dash -.->|"Analyze"| UI_Detail
+```
+
+## Auction Loop (Per Round)
+
+```mermaid
+sequenceDiagram
+    participant FE as Frontend (SSE)
+    participant EX as Auction Engine
+    participant CA as Campaign Agent
+    participant CO as Consumer Agent
+    participant DB as SQLite
+
+    FE->>EX: Start round N
+    EX->>DB: Pick random Consumer + Website
+    EX->>DB: CREATE Auction
+
+    loop For each Campaign (budget > 0)
+        EX->>CA: Evaluate impression
+        CA->>DB: get_campaign()
+        CA->>CA: Decide bid amount
+        alt Places bid
+            CA->>DB: submit_bid(amount, reasoning)
+        else Skips
+            CA-->>EX: No bid
+        end
+        EX-->>FE: campaign_turn event
+    end
+
+    EX->>DB: Winner = max(bid_amount)
+    EX->>DB: Deduct from remaining_budget
+    EX-->>FE: auction_winner event
+
+    EX->>CO: React to winning ad
+    CO->>CO: Evaluate ad vs persona
+    CO->>DB: submit_feedback(like/dislike)
+    EX-->>FE: auction_end event
+```
 
 ---
 

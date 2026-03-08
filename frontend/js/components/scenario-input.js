@@ -21,7 +21,7 @@ export class ScenarioInput {
     const title = el("h2", { textContent: "Launch a Simulation" });
     const subtitle = el("p", {
       textContent:
-        "Describe an advertising scenario. AI agents will generate consumers, websites, and competing campaigns, then run real-time auctions.",
+        "Describe your ad scenario. AdsTycoon's AI agents will generate consumers, websites, and competing campaigns, then run real-time auctions.",
     });
 
     const textarea = el("textarea", {

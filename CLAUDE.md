@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Bid Exchange** is an AI-powered real-time ad auction simulator. LLM agents (via AWS Bedrock + Strands SDK) generate simulation data, make bidding decisions, provide consumer feedback, and produce campaign insights — all streamed to the browser via SSE.
+**AdsTycoon** is an AI-powered real-time ad auction simulator. LLM agents (via AWS Bedrock + Strands SDK) generate simulation data, make bidding decisions, provide consumer feedback, and produce campaign insights — all streamed to the browser via SSE.
 
 ## Commands
 
