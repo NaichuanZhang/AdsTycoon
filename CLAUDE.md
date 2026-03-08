@@ -35,7 +35,7 @@ No linter or formatter is configured.
 
 **Data flow:** User creates simulation → Seeder agent generates consumers/websites/campaigns → Auction engine runs N rounds → Campaign agents bid → Consumer agents give feedback → Insights agent analyzes.
 
-**Agent pattern:** Each agent module (`backend/agents/`) defines a system prompt. Corresponding tools (`backend/tools/`) are plain functions decorated with `@tool` that share a DB session via module-level `_db_session` global, set before each invocation with `set_db_session()`.
+**Agent pattern:** Each agent module (`backend/agents/`) defines a system prompt. Corresponding tools (`backend/tools/`) are plain functions decorated with `@tool`. A session factory is set via `set_session_factory()` before each agent invocation — each tool call creates its own DB session to avoid corruption from parallel Strands tool calls.
 
 **Streaming:** `backend/routers/stream.py` has three SSE endpoints (`/seed`, `/run`, `/insights/{campaign_id}`) that create agents inline, iterate `agent.stream_async()`, and yield formatted SSE events.
 
@@ -59,4 +59,4 @@ Static files served by FastAPI at `/`. ES6 modules in `frontend/js/` with class-
 
 ## Testing
 
-Tests in `backend/tests/`. Fixtures in `conftest.py` provide `db_session` (in-memory SQLite) and `client` (FastAPI TestClient with DB override). Integration tests requiring AWS credentials are marked `@pytest.mark.integration`.
+Tests in `backend/tests/`. Fixtures in `conftest.py` provide `db_session` (in-memory SQLite), `db_session_factory` (sessionmaker for tool tests), and `client` (FastAPI TestClient with DB override). Integration tests requiring AWS credentials are marked `@pytest.mark.integration`.
