@@ -2,9 +2,11 @@
  * View 2 — Live agent event log (tool calls, text, auction events).
  */
 import { el, formatJson, formatCurrency, renderMarkdown } from "../utils.js";
+import { CampaignEditor } from "./campaign-editor.js";
 
 export class AgentStream {
-  constructor({ onRunAuctions, onViewResults }) {
+  constructor({ simId, onRunAuctions, onViewResults }) {
+    this.simId = simId;
     this.onRunAuctions = onRunAuctions;
     this.onViewResults = onViewResults;
     this.container = null;
@@ -13,6 +15,7 @@ export class AgentStream {
     this.statusText = null;
     this.actionsEl = null;
     this.textBuffer = "";
+    this.campaignEditor = null;
   }
 
   render(parent, scenario) {
@@ -87,6 +90,9 @@ export class AgentStream {
   }
 
   showSeedComplete(defaultRounds = 3) {
+    this.campaignEditor = new CampaignEditor({ simId: this.simId });
+    this.campaignEditor.render(this.container);
+
     this.actionsEl.classList.remove("hidden");
     this.actionsEl.innerHTML = "";
 
@@ -228,6 +234,7 @@ export class AgentStream {
   }
 
   destroy() {
+    if (this.campaignEditor) this.campaignEditor.destroy();
     if (this.container) this.container.remove();
   }
 }

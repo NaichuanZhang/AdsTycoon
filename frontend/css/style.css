@@ -450,6 +450,67 @@ main { max-width: 960px; margin: 0 auto; padding: 32px 24px; }
   margin: 12px 0;
 }
 
+/* === Campaign Editor === */
+.campaign-editor { margin-top: 24px; }
+.campaign-editor-header {
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+.campaign-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.campaign-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+}
+.campaign-card:hover { border-color: var(--accent); }
+.card-field { margin-bottom: 10px; }
+.card-field label {
+  display: block;
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+.card-input {
+  width: 100%;
+  padding: 8px 10px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 0.82rem;
+  resize: vertical;
+}
+.card-input:focus { outline: none; border-color: var(--accent); }
+select.card-input { cursor: pointer; }
+.card-footer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+}
+.card-feedback {
+  font-size: 0.78rem;
+  min-height: 1.2em;
+}
+.card-feedback.success { color: var(--green); }
+.card-feedback.error { color: var(--red); }
+.campaign-card-error {
+  color: var(--red);
+  font-size: 0.85rem;
+  padding: 12px;
+}
+
 /* === Utilities === */
 .hidden { display: none !important; }
 .text-green { color: var(--green); }

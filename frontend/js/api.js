@@ -52,6 +52,14 @@ export const api = {
     return request("GET", `/simulations/${simId}/campaigns/${campaignId}`);
   },
 
+  updateCampaign(simId, campaignId, data) {
+    return request(
+      "PUT",
+      `/simulations/${simId}/campaigns/${campaignId}`,
+      data,
+    );
+  },
+
   getDashboard(simId) {
     return request("GET", `/simulations/${simId}/dashboard`);
   },

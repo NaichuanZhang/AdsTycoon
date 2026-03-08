@@ -75,6 +75,7 @@ class App {
     this.newSimBtn.style.display = "block";
 
     const view = new AgentStream({
+      simId: this.simId,
       onRunAuctions: (rounds) => this.startAuctions(rounds),
       onViewResults: () => this.showDashboard(),
     });

@@ -9,6 +9,7 @@ from backend.schemas import (
     CampaignInsightsResponse,
     CampaignResponse,
     CampaignStats,
+    CampaignUpdateRequest,
 )
 
 router = APIRouter(prefix="/api/simulations/{sim_id}/campaigns", tags=["campaigns"])
@@ -43,6 +44,39 @@ def get_campaign(sim_id: str, campaign_id: str, db: Session = Depends(get_db)):
         remaining_budget=campaign.remaining_budget,
         stats=stats,
     )
+
+
+@router.put("/{campaign_id}", response_model=CampaignResponse)
+def update_campaign(
+    sim_id: str, campaign_id: str, payload: CampaignUpdateRequest, db: Session = Depends(get_db)
+):
+    sim = db.query(Simulation).filter_by(id=sim_id).first()
+    if not sim:
+        raise HTTPException(status_code=404, detail="Simulation not found")
+
+    campaign = (
+        db.query(Campaign)
+        .filter_by(id=campaign_id, simulation_id=sim_id)
+        .first()
+    )
+    if not campaign:
+        raise HTTPException(status_code=404, detail="Campaign not found")
+
+    updates = payload.model_dump(exclude_none=True)
+    for field, value in updates.items():
+        setattr(campaign, field, value)
+
+    if "total_budget" in updates:
+        campaign.remaining_budget = updates["total_budget"]
+
+    try:
+        db.commit()
+        db.refresh(campaign)
+    except Exception:
+        db.rollback()
+        raise HTTPException(status_code=500, detail="Failed to update campaign")
+
+    return campaign
 
 
 @router.get("/{campaign_id}/insights", response_model=CampaignInsightsResponse)

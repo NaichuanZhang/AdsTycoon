@@ -90,6 +90,14 @@ class CampaignResponse(BaseModel):
     model_config = {"from_attributes": True}
 
 
+class CampaignUpdateRequest(BaseModel):
+    campaign_name: str | None = Field(default=None, min_length=1)
+    product_description: str | None = Field(default=None, min_length=1)
+    creative: str | None = Field(default=None, min_length=1)
+    goal: str | None = Field(default=None, pattern="^(reach|quality)$")
+    total_budget: float | None = Field(default=None, gt=0)
+
+
 class CampaignStats(BaseModel):
     total_bids: int = 0
     wins: int = 0
