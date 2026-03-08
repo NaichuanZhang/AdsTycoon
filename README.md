@@ -6,6 +6,43 @@ A simulated real-time ad auction where AI consumer agents, website contexts, and
 
 ---
 
+## Solution 
+
+```mermaid
+graph TD
+    %% Problem Layer
+    subgraph Problems [Market Challenges]
+        P1[<b>1. Budget Overspend</b><br/>Manual allocation is<br/>inefficient & risky]
+        P2[<b>2. Reputation Damage</b><br/>Misaligned ads create<br/>negative sentiment]
+        P3[<b>3. Lack of Insights</b><br/>Data silos prevent<br/>strategy evolution]
+    end
+
+    %% Solution Layer
+    subgraph Solution [AdsTycoon Agentic Ecosystem]
+        S1[<b>Autonomous Budget Agent</b><br/>Real-time allocation &<br/>limit monitoring]
+        S2[<b>Consumer Sentiment Feedback</b><br/>Simulated persona reactions<br/>pre-launch]
+        S3[<b>Evolutionary Strategy Engine</b><br/>Automated 'TODOs' &<br/>rationales]
+    end
+
+    %% Mapping Problems to Solutions
+    P1 -.->|Solved by| S1
+    P2 -.->|Solved by| S2
+    P3 -.->|Solved by| S3
+
+    %% Flow through the System
+    S1 --> Auction{AdsTycoon Auction}
+    S2 --> Auction
+    Auction --> Results[Results Dashboard]
+    Results -->|Generates| S3
+    S3 -->|Updates| S1
+    
+    style Problems fill:#fff2f2,stroke:#a33,stroke-width:2px
+    style Solution fill:#f2f9ff,stroke:#33a,stroke-width:2px
+    style Auction fill:#bbf,stroke:#333
+```
+
+---
+
 ## Architecture
 
 ```mermaid
