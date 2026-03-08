@@ -1,7 +1,7 @@
 /**
  * View 2 — Live agent event log (tool calls, text, auction events).
  */
-import { el, formatJson, formatCurrency } from "../utils.js";
+import { el, formatJson, formatCurrency, renderMarkdown } from "../utils.js";
 
 export class AgentStream {
   constructor({ onRunAuctions, onViewResults }) {
@@ -157,8 +157,8 @@ export class AgentStream {
       return;
     }
     const entry = el("div", {
-      className: "log-entry log-text",
-      textContent: this.textBuffer.trim(),
+      className: "log-entry log-text log-markdown",
+      innerHTML: renderMarkdown(this.textBuffer.trim()),
     });
     this.logEl.appendChild(entry);
     this.textBuffer = "";

@@ -1,8 +1,8 @@
 /**
  * Campaign detail panel with streamed AI insights.
  */
-import { el, formatCurrency } from '../utils.js';
-import { api, connectSSE } from '../api.js';
+import { el, formatCurrency, renderMarkdown } from "../utils.js";
+import { api, connectSSE } from "../api.js";
 
 export class CampaignDetail {
   constructor({ simId }) {
@@ -14,7 +14,7 @@ export class CampaignDetail {
   render(parent, campaign) {
     if (this.container) this.container.remove();
 
-    this.container = el('div', { className: 'insight-panel' });
+    this.container = el("div", { className: "insight-panel" });
     this.container.innerHTML = `
       <h3>${campaign.campaign_name} — Insights</h3>
       <div class="summary text-dim">Analyzing with AI agent...</div>
@@ -26,25 +26,26 @@ export class CampaignDetail {
   }
 
   async _fetchInsights(campaignId) {
-    const summaryEl = this.container.querySelector('.summary');
-    const suggestionsEl = this.container.querySelector('.suggestions');
+    const summaryEl = this.container.querySelector(".summary");
+    const suggestionsEl = this.container.querySelector(".suggestions");
 
-    let textBuffer = '';
+    let textBuffer = "";
 
     this.sseConnection = connectSSE(
       `/simulations/${this.simId}/stream/insights/${campaignId}`,
       (event) => {
-        if (event.type === 'text') {
+        if (event.type === "text") {
           textBuffer += event.content;
-          summaryEl.textContent = textBuffer;
-        } else if (event.type === 'tool_call') {
+          summaryEl.innerHTML = renderMarkdown(textBuffer);
+          summaryEl.classList.add("log-markdown");
+        } else if (event.type === "tool_call") {
           summaryEl.textContent = `Calling ${event.tool}...`;
-        } else if (event.type === 'done') {
+        } else if (event.type === "done") {
           this._parseInsights(textBuffer, summaryEl, suggestionsEl);
           if (this.sseConnection) this.sseConnection.close();
-        } else if (event.type === 'error') {
+        } else if (event.type === "error") {
           summaryEl.textContent = `Error: ${event.message}`;
-          summaryEl.className = 'summary text-red';
+          summaryEl.className = "summary text-red";
           if (this.sseConnection) this.sseConnection.close();
         }
       },
@@ -53,27 +54,28 @@ export class CampaignDetail {
         if (textBuffer) {
           this._parseInsights(textBuffer, summaryEl, suggestionsEl);
         }
-      }
+      },
     );
   }
 
   _parseInsights(text, summaryEl, suggestionsEl) {
     try {
-      const start = text.indexOf('{');
-      const end = text.lastIndexOf('}') + 1;
+      const start = text.indexOf("{");
+      const end = text.lastIndexOf("}") + 1;
       if (start >= 0 && end > start) {
         const json = JSON.parse(text.slice(start, end));
         summaryEl.textContent = json.summary || text;
-        suggestionsEl.innerHTML = '';
-        for (const s of (json.suggestions || [])) {
-          suggestionsEl.appendChild(el('li', { textContent: s }));
+        suggestionsEl.innerHTML = "";
+        for (const s of json.suggestions || []) {
+          suggestionsEl.appendChild(el("li", { textContent: s }));
         }
         return;
       }
     } catch {
       // Not JSON, display raw text
     }
-    summaryEl.textContent = text || 'Analysis complete.';
+    summaryEl.innerHTML = renderMarkdown(text || "Analysis complete.");
+    summaryEl.classList.add("log-markdown");
   }
 
   destroy() {
