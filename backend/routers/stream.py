@@ -19,13 +19,13 @@ from backend.agents.seeder import build_seeder_prompt
 from backend.database import SessionLocal
 from backend.models import Auction, Campaign, Consumer, Simulation, Website
 from backend.tools.campaign_tools import get_campaign, submit_bid
-from backend.tools.campaign_tools import set_db_session as set_campaign_db
+from backend.tools.campaign_tools import set_session_factory as set_campaign_factory
 from backend.tools.consumer_tools import submit_feedback
-from backend.tools.consumer_tools import set_db_session as set_consumer_db
+from backend.tools.consumer_tools import set_session_factory as set_consumer_factory
 from backend.tools.insights_tools import get_campaign_auctions, get_campaign_stats
-from backend.tools.insights_tools import set_db_session as set_insights_db
+from backend.tools.insights_tools import set_session_factory as set_insights_factory
 from backend.tools.seeder_tools import create_campaigns, create_consumers, create_websites
-from backend.tools.seeder_tools import set_db_session as set_seeder_db
+from backend.tools.seeder_tools import set_session_factory as set_seeder_factory
 
 logger = logging.getLogger("bid_exchange.stream")
 
@@ -91,7 +91,7 @@ async def stream_seed(sim_id: str):
         if not sim:
             raise HTTPException(status_code=404, detail="Simulation not found")
 
-        set_seeder_db(db)
+        set_seeder_factory(SessionLocal)
         model = create_bedrock_model()
         agent = Agent(
             model=model,
@@ -208,7 +208,7 @@ async def stream_run(sim_id: str, rounds: int = Query(default=None, ge=1, le=50)
                             "remaining_budget": round(camp.remaining_budget, 2),
                         })
 
-                        set_campaign_db(db)
+                        set_campaign_factory(SessionLocal)
                         model = create_bedrock_model()
                         camp_agent = Agent(
                             model=model,
@@ -246,7 +246,7 @@ async def stream_run(sim_id: str, rounds: int = Query(default=None, ge=1, le=50)
                                 "reasoning": winning_bid.reasoning,
                             })
 
-                            set_consumer_db(db)
+                            set_consumer_factory(SessionLocal)
                             consumer_model = create_bedrock_model()
                             consumer_agent = Agent(
                                 model=consumer_model,
@@ -306,7 +306,7 @@ async def stream_insights(sim_id: str, campaign_id: str):
         if not campaign:
             raise HTTPException(status_code=404, detail="Campaign not found")
 
-        set_insights_db(db)
+        set_insights_factory(SessionLocal)
         model = create_bedrock_model()
         agent = Agent(
             model=model,

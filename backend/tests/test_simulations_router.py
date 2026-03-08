@@ -7,22 +7,26 @@ from sqlalchemy.orm import Session
 from backend.models import Campaign, Consumer, Simulation, Website
 
 
-def _seed_manually(db: Session, sim_id: str):
+def _seed_manually(session_factory, sim_id: str):
     """Manually seed data instead of calling the real AI agent."""
-    db.add(Consumer(
-        simulation_id=sim_id, name="Alice", age=25, gender="female",
-        income_level="high", interests=["tech"], intent="browsing", location="NYC",
-    ))
-    db.add(Website(
-        simulation_id=sim_id, name="TechCrunch", page_context="AI article",
-        ad_placement="banner", category="tech",
-    ))
-    db.add(Campaign(
-        simulation_id=sim_id, campaign_name="Nike", product_description="Shoes",
-        creative="Just do it — every step counts",
-        goal="reach", total_budget=1000.0, remaining_budget=1000.0,
-    ))
-    db.commit()
+    db = session_factory()
+    try:
+        db.add(Consumer(
+            simulation_id=sim_id, name="Alice", age=25, gender="female",
+            income_level="high", interests=["tech"], intent="browsing", location="NYC",
+        ))
+        db.add(Website(
+            simulation_id=sim_id, name="TechCrunch", page_context="AI article",
+            ad_placement="banner", category="tech",
+        ))
+        db.add(Campaign(
+            simulation_id=sim_id, campaign_name="Nike", product_description="Shoes",
+            creative="Just do it — every step counts",
+            goal="reach", total_budget=1000.0, remaining_budget=1000.0,
+        ))
+        db.commit()
+    finally:
+        db.close()
 
 
 class TestCreateSimulation:
@@ -51,15 +55,16 @@ class TestCreateSimulation:
         assert resp.json()["num_rounds"] == 10
 
     @patch("backend.routers.simulations.run_seeder")
-    def test_seed_simulation(self, mock_seeder, client, db_session):
-        mock_seeder.side_effect = lambda simulation_id, scenario, num_consumers, num_websites, num_campaigns, num_rounds, db_session: _seed_manually(db_session, simulation_id)
+    def test_seed_simulation(self, mock_seeder, client, db_session, db_session_factory):
+        mock_seeder.side_effect = lambda simulation_id, scenario, num_consumers, num_websites, num_campaigns, num_rounds, session_factory: _seed_manually(session_factory, simulation_id)
 
         sim = Simulation(scenario="test seed", status="created")
         db_session.add(sim)
         db_session.commit()
         db_session.refresh(sim)
 
-        resp = client.post(f"/api/simulations/{sim.id}/seed")
+        with patch("backend.routers.simulations.SessionLocal", db_session_factory):
+            resp = client.post(f"/api/simulations/{sim.id}/seed")
         assert resp.status_code == 200
         data = resp.json()
         assert data["status"] == "seeded"

@@ -1,4 +1,8 @@
-"""Strands tools for the Consumer Feedback Agent."""
+"""Strands tools for the Consumer Feedback Agent.
+
+A session factory is set via set_session_factory() before each agent invocation.
+Each tool creates its own session to avoid corruption from parallel tool calls.
+"""
 
 import logging
 
@@ -8,18 +12,18 @@ from backend.models import Auction
 
 logger = logging.getLogger("bid_exchange.consumer_tools")
 
-_db_session = None
+_session_factory = None
 
 
-def set_db_session(session):
-    global _db_session
-    _db_session = session
+def set_session_factory(factory):
+    global _session_factory
+    _session_factory = factory
 
 
-def _get_db():
-    if _db_session is None:
-        raise RuntimeError("DB session not set. Call set_db_session() first.")
-    return _db_session
+def _new_db():
+    if _session_factory is None:
+        raise RuntimeError("Session factory not set. Call set_session_factory() first.")
+    return _session_factory()
 
 
 @tool
@@ -34,21 +38,21 @@ def submit_feedback(auction_id: str, feedback: str, reasoning: str) -> str:
     Returns:
         Confirmation message.
     """
-    db = _get_db()
-
-    if feedback not in ("like", "dislike"):
-        return f"Invalid feedback '{feedback}'. Must be 'like' or 'dislike'."
-
-    auction = db.query(Auction).filter(Auction.id == auction_id).first()
-    if not auction:
-        return f"Auction {auction_id} not found"
-
+    db = _new_db()
     try:
+        if feedback not in ("like", "dislike"):
+            return f"Invalid feedback '{feedback}'. Must be 'like' or 'dislike'."
+
+        auction = db.query(Auction).filter(Auction.id == auction_id).first()
+        if not auction:
+            return f"Auction {auction_id} not found"
+
         auction.consumer_feedback = feedback
         db.commit()
+        return f"Feedback '{feedback}' recorded for auction {auction_id}. Reason: {reasoning}"
     except Exception as e:
         logger.exception("Failed to submit feedback")
         db.rollback()
         return f"Error submitting feedback: {e}"
-
-    return f"Feedback '{feedback}' recorded for auction {auction_id}. Reason: {reasoning}"
+    finally:
+        db.close()

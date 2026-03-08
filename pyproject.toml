@@ -11,6 +11,7 @@ dependencies = [
     "strands-agents[bedrock]>=0.1.0",
     "boto3>=1.34.0",
     "httpx>=0.27.0",
+    "composio-core>=0.7.0",
 ]
 
 [dependency-groups]
@@ -22,3 +23,5 @@ dev = [
 [tool.pytest.ini_options]
 testpaths = ["backend/tests"]
 pythonpath = ["."]
+markers = ["integration: tests requiring external services (Bedrock, Composio)"]
+addopts = "-m 'not integration'"

@@ -3,7 +3,7 @@
 from strands import Agent
 
 from backend.agents import create_bedrock_model
-from backend.tools.consumer_tools import set_db_session, submit_feedback
+from backend.tools.consumer_tools import set_session_factory, submit_feedback
 
 SYSTEM_PROMPT = """You are a consumer feedback agent for a real-time ad exchange simulation.
 
@@ -49,9 +49,9 @@ def run_consumer_agent(
     consumer_profile: str,
     website_context: str,
     ad_description: str,
-    db_session,
+    session_factory,
 ) -> None:
-    set_db_session(db_session)
+    set_session_factory(session_factory)
 
     model = create_bedrock_model()
     agent = Agent(

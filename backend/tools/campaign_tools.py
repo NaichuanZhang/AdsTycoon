@@ -1,4 +1,8 @@
-"""Strands tools for the Campaign Agent."""
+"""Strands tools for the Campaign Agent.
+
+A session factory is set via set_session_factory() before each agent invocation.
+Each tool creates its own session to avoid corruption from parallel tool calls.
+"""
 
 import logging
 import uuid
@@ -9,18 +13,18 @@ from backend.models import Bid, Campaign
 
 logger = logging.getLogger("bid_exchange.campaign_tools")
 
-_db_session = None
+_session_factory = None
 
 
-def set_db_session(session):
-    global _db_session
-    _db_session = session
+def set_session_factory(factory):
+    global _session_factory
+    _session_factory = factory
 
 
-def _get_db():
-    if _db_session is None:
-        raise RuntimeError("DB session not set. Call set_db_session() first.")
-    return _db_session
+def _new_db():
+    if _session_factory is None:
+        raise RuntimeError("Session factory not set. Call set_session_factory() first.")
+    return _session_factory()
 
 
 @tool
@@ -33,19 +37,22 @@ def get_campaign(campaign_id: str) -> str:
     Returns:
         Campaign details as a formatted string.
     """
-    db = _get_db()
-    campaign = db.query(Campaign).filter(Campaign.id == campaign_id).first()
-    if not campaign:
-        return f"Campaign {campaign_id} not found"
+    db = _new_db()
+    try:
+        campaign = db.query(Campaign).filter(Campaign.id == campaign_id).first()
+        if not campaign:
+            return f"Campaign {campaign_id} not found"
 
-    return (
-        f"Campaign: {campaign.campaign_name}\n"
-        f"Product: {campaign.product_description}\n"
-        f"Creative: {campaign.creative}\n"
-        f"Goal: {campaign.goal}\n"
-        f"Total Budget: ${campaign.total_budget:.2f}\n"
-        f"Remaining Budget: ${campaign.remaining_budget:.2f}"
-    )
+        return (
+            f"Campaign: {campaign.campaign_name}\n"
+            f"Product: {campaign.product_description}\n"
+            f"Creative: {campaign.creative}\n"
+            f"Goal: {campaign.goal}\n"
+            f"Total Budget: ${campaign.total_budget:.2f}\n"
+            f"Remaining Budget: ${campaign.remaining_budget:.2f}"
+        )
+    finally:
+        db.close()
 
 
 @tool
@@ -61,33 +68,34 @@ def submit_bid(auction_id: str, campaign_id: str, bid_amount: float, reasoning: 
     Returns:
         Confirmation or rejection message.
     """
-    db = _get_db()
-    campaign = db.query(Campaign).filter(Campaign.id == campaign_id).first()
-    if not campaign:
-        return f"Campaign {campaign_id} not found"
-
-    if bid_amount <= 0:
-        return f"Bid amount must be positive. Got: {bid_amount}"
-
-    if bid_amount > campaign.remaining_budget:
-        return (
-            f"Bid ${bid_amount:.2f} exceeds remaining budget "
-            f"${campaign.remaining_budget:.2f}. Bid rejected."
-        )
-
-    bid = Bid(
-        id=str(uuid.uuid4()),
-        auction_id=auction_id,
-        campaign_id=campaign_id,
-        bid_amount=bid_amount,
-        reasoning=reasoning,
-    )
+    db = _new_db()
     try:
+        campaign = db.query(Campaign).filter(Campaign.id == campaign_id).first()
+        if not campaign:
+            return f"Campaign {campaign_id} not found"
+
+        if bid_amount <= 0:
+            return f"Bid amount must be positive. Got: {bid_amount}"
+
+        if bid_amount > campaign.remaining_budget:
+            return (
+                f"Bid ${bid_amount:.2f} exceeds remaining budget "
+                f"${campaign.remaining_budget:.2f}. Bid rejected."
+            )
+
+        bid = Bid(
+            id=str(uuid.uuid4()),
+            auction_id=auction_id,
+            campaign_id=campaign_id,
+            bid_amount=bid_amount,
+            reasoning=reasoning,
+        )
         db.add(bid)
         db.commit()
+        return f"Bid of ${bid_amount:.2f} placed for campaign {campaign.campaign_name}"
     except Exception as e:
         logger.exception("Failed to submit bid")
         db.rollback()
         return f"Error submitting bid: {e}"
-
-    return f"Bid of ${bid_amount:.2f} placed for campaign {campaign.campaign_name}"
+    finally:
+        db.close()

@@ -9,20 +9,30 @@ from backend.main import app
 
 
 @pytest.fixture
-def db_session():
+def db_engine():
     engine = create_engine(
         "sqlite://",
         connect_args={"check_same_thread": False},
         poolclass=StaticPool,
     )
     Base.metadata.create_all(bind=engine)
-    testing_session = sessionmaker(bind=engine, autocommit=False, autoflush=False)
-    session = testing_session()
+    yield engine
+    Base.metadata.drop_all(bind=engine)
+
+
+@pytest.fixture
+def db_session_factory(db_engine):
+    """Returns a sessionmaker bound to the in-memory test engine."""
+    return sessionmaker(bind=db_engine, autocommit=False, autoflush=False)
+
+
+@pytest.fixture
+def db_session(db_session_factory):
+    session = db_session_factory()
     try:
         yield session
     finally:
         session.close()
-        Base.metadata.drop_all(bind=engine)
 
 
 @pytest.fixture

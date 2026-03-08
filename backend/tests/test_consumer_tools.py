@@ -3,7 +3,7 @@
 from sqlalchemy.orm import Session
 
 from backend.models import Auction, Campaign, Consumer, Simulation, Website
-from backend.tools.consumer_tools import set_db_session, submit_feedback
+from backend.tools.consumer_tools import set_session_factory, submit_feedback
 
 
 def _setup_auction(db: Session):
@@ -44,8 +44,8 @@ def _setup_auction(db: Session):
 
 
 class TestSubmitFeedback:
-    def test_like(self, db_session):
-        set_db_session(db_session)
+    def test_like(self, db_session, db_session_factory):
+        set_session_factory(db_session_factory)
         auction = _setup_auction(db_session)
         result = submit_feedback._tool_func(
             auction_id=auction.id, feedback="like", reasoning="Relevant ad",
@@ -54,8 +54,8 @@ class TestSubmitFeedback:
         db_session.refresh(auction)
         assert auction.consumer_feedback == "like"
 
-    def test_dislike(self, db_session):
-        set_db_session(db_session)
+    def test_dislike(self, db_session, db_session_factory):
+        set_session_factory(db_session_factory)
         auction = _setup_auction(db_session)
         result = submit_feedback._tool_func(
             auction_id=auction.id, feedback="dislike", reasoning="Irrelevant",
@@ -64,8 +64,8 @@ class TestSubmitFeedback:
         db_session.refresh(auction)
         assert auction.consumer_feedback == "dislike"
 
-    def test_invalid_feedback(self, db_session):
-        set_db_session(db_session)
+    def test_invalid_feedback(self, db_session, db_session_factory):
+        set_session_factory(db_session_factory)
         auction = _setup_auction(db_session)
         result = submit_feedback._tool_func(
             auction_id=auction.id, feedback="meh", reasoning="Whatever",

@@ -8,7 +8,7 @@ from backend.agents import create_bedrock_model
 from backend.tools.insights_tools import (
     get_campaign_auctions,
     get_campaign_stats,
-    set_db_session,
+    set_session_factory,
 )
 
 SYSTEM_PROMPT = """You are a campaign performance analyst for an advertising exchange.
@@ -30,8 +30,8 @@ Be specific and actionable in your suggestions. Reference actual numbers from th
 """
 
 
-def run_insights_agent(campaign_id: str, db_session) -> dict:
-    set_db_session(db_session)
+def run_insights_agent(campaign_id: str, session_factory) -> dict:
+    set_session_factory(session_factory)
 
     model = create_bedrock_model()
     agent = Agent(

@@ -6,7 +6,7 @@ from backend.models import Auction, Bid, Campaign, Consumer, Simulation, Website
 from backend.tools.insights_tools import (
     get_campaign_auctions,
     get_campaign_stats,
-    set_db_session,
+    set_session_factory,
 )
 
 
@@ -55,16 +55,16 @@ def _populate(db: Session):
 
 
 class TestGetCampaignAuctions:
-    def test_returns_history(self, db_session):
-        set_db_session(db_session)
+    def test_returns_history(self, db_session, db_session_factory):
+        set_session_factory(db_session_factory)
         campaign = _populate(db_session)
         result = get_campaign_auctions._tool_func(campaign_id=campaign.id)
         assert "1 bids" in result
         assert "WON" in result
         assert "$5.00" in result
 
-    def test_no_history(self, db_session):
-        set_db_session(db_session)
+    def test_no_history(self, db_session, db_session_factory):
+        set_session_factory(db_session_factory)
         sim = Simulation(scenario="test")
         db_session.add(sim)
         db_session.commit()
@@ -82,8 +82,8 @@ class TestGetCampaignAuctions:
 
 
 class TestGetCampaignStats:
-    def test_returns_stats(self, db_session):
-        set_db_session(db_session)
+    def test_returns_stats(self, db_session, db_session_factory):
+        set_session_factory(db_session_factory)
         campaign = _populate(db_session)
         result = get_campaign_stats._tool_func(campaign_id=campaign.id)
         assert "Nike" in result
@@ -91,7 +91,7 @@ class TestGetCampaignStats:
         assert "Likes: 1" in result
         assert "$5.00" in result
 
-    def test_not_found(self, db_session):
-        set_db_session(db_session)
+    def test_not_found(self, db_session, db_session_factory):
+        set_session_factory(db_session_factory)
         result = get_campaign_stats._tool_func(campaign_id="nonexistent")
         assert "not found" in result

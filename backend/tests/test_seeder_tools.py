@@ -7,7 +7,7 @@ from backend.tools.seeder_tools import (
     create_campaigns,
     create_consumers,
     create_websites,
-    set_db_session,
+    set_session_factory,
 )
 
 
@@ -20,8 +20,8 @@ def _make_sim(db: Session) -> Simulation:
 
 
 class TestCreateConsumers:
-    def test_inserts_consumers(self, db_session: Session):
-        set_db_session(db_session)
+    def test_inserts_consumers(self, db_session: Session, db_session_factory):
+        set_session_factory(db_session_factory)
         sim = _make_sim(db_session)
 
         consumers_data = [
@@ -64,8 +64,8 @@ class TestCreateConsumers:
         assert by_name["Bob"].mood == "relaxed"
         assert by_name["Bob"].openness_to_ads == 2
 
-    def test_defaults_when_fields_omitted(self, db_session: Session):
-        set_db_session(db_session)
+    def test_defaults_when_fields_omitted(self, db_session: Session, db_session_factory):
+        set_session_factory(db_session_factory)
         sim = _make_sim(db_session)
 
         consumers_data = [
@@ -91,8 +91,8 @@ class TestCreateConsumers:
 
 
 class TestCreateWebsites:
-    def test_inserts_websites(self, db_session: Session):
-        set_db_session(db_session)
+    def test_inserts_websites(self, db_session: Session, db_session_factory):
+        set_session_factory(db_session_factory)
         sim = _make_sim(db_session)
 
         websites_data = [
@@ -115,8 +115,8 @@ class TestCreateWebsites:
 
 
 class TestCreateCampaigns:
-    def test_inserts_campaigns(self, db_session: Session):
-        set_db_session(db_session)
+    def test_inserts_campaigns(self, db_session: Session, db_session_factory):
+        set_session_factory(db_session_factory)
         sim = _make_sim(db_session)
 
         campaigns_data = [

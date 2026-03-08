@@ -3,7 +3,7 @@
 from sqlalchemy.orm import Session
 
 from backend.models import Auction, Bid, Campaign, Consumer, Simulation, Website
-from backend.tools.campaign_tools import get_campaign, set_db_session, submit_bid
+from backend.tools.campaign_tools import get_campaign, set_session_factory, submit_bid
 
 
 def _setup_auction(db: Session):
@@ -42,22 +42,22 @@ def _setup_auction(db: Session):
 
 
 class TestGetCampaign:
-    def test_returns_campaign_details(self, db_session):
-        set_db_session(db_session)
+    def test_returns_campaign_details(self, db_session, db_session_factory):
+        set_session_factory(db_session_factory)
         _, _, _, campaign, _ = _setup_auction(db_session)
         result = get_campaign._tool_func(campaign_id=campaign.id)
         assert "Nike" in result
         assert "$100.00" in result
 
-    def test_not_found(self, db_session):
-        set_db_session(db_session)
+    def test_not_found(self, db_session, db_session_factory):
+        set_session_factory(db_session_factory)
         result = get_campaign._tool_func(campaign_id="nonexistent")
         assert "not found" in result
 
 
 class TestSubmitBid:
-    def test_valid_bid(self, db_session):
-        set_db_session(db_session)
+    def test_valid_bid(self, db_session, db_session_factory):
+        set_session_factory(db_session_factory)
         _, _, _, campaign, auction = _setup_auction(db_session)
         result = submit_bid._tool_func(
             auction_id=auction.id, campaign_id=campaign.id,
@@ -69,8 +69,8 @@ class TestSubmitBid:
         assert len(bids) == 1
         assert bids[0].bid_amount == 5.0
 
-    def test_bid_exceeds_budget(self, db_session):
-        set_db_session(db_session)
+    def test_bid_exceeds_budget(self, db_session, db_session_factory):
+        set_session_factory(db_session_factory)
         _, _, _, campaign, auction = _setup_auction(db_session)
         result = submit_bid._tool_func(
             auction_id=auction.id, campaign_id=campaign.id,
@@ -81,8 +81,8 @@ class TestSubmitBid:
         bids = db_session.query(Bid).filter_by(auction_id=auction.id).all()
         assert len(bids) == 0
 
-    def test_negative_bid_rejected(self, db_session):
-        set_db_session(db_session)
+    def test_negative_bid_rejected(self, db_session, db_session_factory):
+        set_session_factory(db_session_factory)
         _, _, _, campaign, auction = _setup_auction(db_session)
         result = submit_bid._tool_func(
             auction_id=auction.id, campaign_id=campaign.id,

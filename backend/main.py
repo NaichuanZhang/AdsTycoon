@@ -8,7 +8,7 @@ from fastapi.staticfiles import StaticFiles
 
 from backend.database import Base, engine
 from backend.exceptions import BidExchangeError, bid_exchange_error_handler
-from backend.routers import auctions, campaigns, dashboard, simulations
+from backend.routers import auctions, campaigns, dashboard, export, simulations
 from backend.routers import stream
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
@@ -45,6 +45,7 @@ app.include_router(auctions.router)
 app.include_router(campaigns.router)
 app.include_router(dashboard.router)
 app.include_router(stream.router)
+app.include_router(export.router)
 
 
 @app.middleware("http")

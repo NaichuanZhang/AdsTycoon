@@ -3,7 +3,7 @@
 from strands import Agent
 
 from backend.agents import create_bedrock_model
-from backend.tools.campaign_tools import get_campaign, set_db_session, submit_bid
+from backend.tools.campaign_tools import get_campaign, set_session_factory, submit_bid
 
 SYSTEM_PROMPT = """You are a campaign bidding agent for a real-time ad exchange.
 
@@ -33,9 +33,9 @@ def run_campaign_agent(
     auction_id: str,
     consumer_profile: str,
     website_context: str,
-    db_session,
+    session_factory,
 ) -> None:
-    set_db_session(db_session)
+    set_session_factory(session_factory)
 
     model = create_bedrock_model()
     agent = Agent(

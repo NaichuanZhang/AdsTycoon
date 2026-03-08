@@ -1,7 +1,8 @@
 """Strands tools for the Seeding Agent.
 
 Each tool receives data from the LLM and inserts rows into the DB.
-The DB session is set via set_db_session() before each agent invocation.
+A session factory is set via set_session_factory() before each agent invocation.
+Each tool creates its own session to avoid corruption from parallel tool calls.
 """
 
 import logging
@@ -13,18 +14,18 @@ from backend.models import Campaign, Consumer, Website
 
 logger = logging.getLogger("bid_exchange.seeder_tools")
 
-_db_session = None
+_session_factory = None
 
 
-def set_db_session(session):
-    global _db_session
-    _db_session = session
+def set_session_factory(factory):
+    global _session_factory
+    _session_factory = factory
 
 
-def _get_db():
-    if _db_session is None:
-        raise RuntimeError("DB session not set. Call set_db_session() first.")
-    return _db_session
+def _new_db():
+    if _session_factory is None:
+        raise RuntimeError("Session factory not set. Call set_session_factory() first.")
+    return _session_factory()
 
 
 @tool
@@ -42,12 +43,12 @@ def create_consumers(simulation_id: str, consumers: list[dict]) -> str:
     Returns:
         A confirmation message with the count of consumers created.
     """
-    db = _get_db()
-    existing = db.query(Consumer).filter_by(simulation_id=simulation_id).count()
-    if existing > 0:
-        return f"Simulation {simulation_id} already has {existing} consumers, skipping."
-
+    db = _new_db()
     try:
+        existing = db.query(Consumer).filter_by(simulation_id=simulation_id).count()
+        if existing > 0:
+            return f"Simulation {simulation_id} already has {existing} consumers, skipping."
+
         created = 0
         for c in consumers:
             consumer = Consumer(
@@ -71,6 +72,8 @@ def create_consumers(simulation_id: str, consumers: list[dict]) -> str:
         logger.exception("Failed to create consumers")
         db.rollback()
         return f"Error creating consumers: {e}"
+    finally:
+        db.close()
 
 
 @tool
@@ -86,12 +89,12 @@ def create_websites(simulation_id: str, websites: list[dict]) -> str:
     Returns:
         A confirmation message with the count of websites created.
     """
-    db = _get_db()
-    existing = db.query(Website).filter_by(simulation_id=simulation_id).count()
-    if existing > 0:
-        return f"Simulation {simulation_id} already has {existing} websites, skipping."
-
+    db = _new_db()
     try:
+        existing = db.query(Website).filter_by(simulation_id=simulation_id).count()
+        if existing > 0:
+            return f"Simulation {simulation_id} already has {existing} websites, skipping."
+
         created = 0
         for w in websites:
             website = Website(
@@ -110,6 +113,8 @@ def create_websites(simulation_id: str, websites: list[dict]) -> str:
         logger.exception("Failed to create websites")
         db.rollback()
         return f"Error creating websites: {e}"
+    finally:
+        db.close()
 
 
 @tool
@@ -126,12 +131,12 @@ def create_campaigns(simulation_id: str, campaigns: list[dict]) -> str:
     Returns:
         A confirmation message with the count of campaigns created.
     """
-    db = _get_db()
-    existing = db.query(Campaign).filter_by(simulation_id=simulation_id).count()
-    if existing > 0:
-        return f"Simulation {simulation_id} already has {existing} campaigns, skipping."
-
+    db = _new_db()
     try:
+        existing = db.query(Campaign).filter_by(simulation_id=simulation_id).count()
+        if existing > 0:
+            return f"Simulation {simulation_id} already has {existing} campaigns, skipping."
+
         created = 0
         for camp in campaigns:
             budget = camp["total_budget"]
@@ -153,3 +158,5 @@ def create_campaigns(simulation_id: str, campaigns: list[dict]) -> str:
         logger.exception("Failed to create campaigns")
         db.rollback()
         return f"Error creating campaigns: {e}"
+    finally:
+        db.close()

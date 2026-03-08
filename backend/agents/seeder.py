@@ -7,7 +7,7 @@ from backend.tools.seeder_tools import (
     create_campaigns,
     create_consumers,
     create_websites,
-    set_db_session,
+    set_session_factory,
 )
 
 SYSTEM_PROMPT = """You are a simulation data generator for an advertising exchange.
@@ -134,9 +134,9 @@ def run_seeder(
     num_websites: int,
     num_campaigns: int,
     num_rounds: int,
-    db_session,
+    session_factory,
 ) -> None:
-    set_db_session(db_session)
+    set_session_factory(session_factory)
 
     model = create_bedrock_model()
     agent = Agent(

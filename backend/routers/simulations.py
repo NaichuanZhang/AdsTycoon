@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from backend.agents.seeder import run_seeder
-from backend.database import get_db
+from backend.database import SessionLocal, get_db
 from backend.models import Simulation
 from backend.schemas import (
     AuctionListResponse,
@@ -44,7 +44,7 @@ def seed_simulation(sim_id: str, db: Session = Depends(get_db)):
         num_websites=sim.num_websites,
         num_campaigns=sim.num_campaigns,
         num_rounds=sim.num_rounds,
-        db_session=db,
+        session_factory=SessionLocal,
     )
 
     sim.status = "seeded"

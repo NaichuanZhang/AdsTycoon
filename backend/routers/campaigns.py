@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from backend.agents.insights import run_insights_agent
-from backend.database import get_db
+from backend.database import SessionLocal, get_db
 from backend.models import Auction, Bid, Campaign, Simulation
 from backend.schemas import (
     CampaignDetailResponse,
@@ -89,7 +89,7 @@ def get_campaign_insights(sim_id: str, campaign_id: str, db: Session = Depends(g
     if not campaign:
         raise HTTPException(status_code=404, detail="Campaign not found")
 
-    result = run_insights_agent(campaign_id, db)
+    result = run_insights_agent(campaign_id, SessionLocal)
     return CampaignInsightsResponse(
         campaign_id=campaign_id,
         summary=result.get("summary", ""),

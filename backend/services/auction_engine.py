@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from backend.agents.campaign import run_campaign_agent
 from backend.agents.consumer import run_consumer_agent
+from backend.database import SessionLocal
 from backend.models import Auction, Bid, Campaign, Consumer, Website
 
 
@@ -62,7 +63,7 @@ def run_single_auction(db: Session, simulation_id: str) -> Auction:
             auction_id=auction.id,
             consumer_profile=consumer_text,
             website_context=website_text,
-            db_session=db,
+            session_factory=SessionLocal,
         )
 
     db.refresh(auction)
@@ -82,7 +83,7 @@ def run_single_auction(db: Session, simulation_id: str) -> Auction:
                 consumer_profile=consumer_text,
                 website_context=website_text,
                 ad_description=winner_campaign.creative,
-                db_session=db,
+                session_factory=SessionLocal,
             )
 
     db.commit()

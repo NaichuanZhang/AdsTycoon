@@ -63,6 +63,10 @@ export const api = {
   getDashboard(simId) {
     return request("GET", `/simulations/${simId}/dashboard`);
   },
+
+  exportToSheets(simId) {
+    return request("POST", `/simulations/${simId}/export/google-sheets`);
+  },
 };
 
 /**
