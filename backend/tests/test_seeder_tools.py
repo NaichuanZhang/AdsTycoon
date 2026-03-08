@@ -32,6 +32,8 @@ class TestCreateConsumers:
                 "income_level": "high",
                 "interests": ["tech", "gaming"],
                 "intent": "browsing",
+                "mood": "curious",
+                "openness_to_ads": 4,
                 "location": "NYC",
             },
             {
@@ -41,6 +43,8 @@ class TestCreateConsumers:
                 "income_level": "medium",
                 "interests": ["sports"],
                 "intent": "ready to buy",
+                "mood": "relaxed",
+                "openness_to_ads": 2,
                 "location": "LA",
             },
         ]
@@ -54,6 +58,36 @@ class TestCreateConsumers:
         assert len(rows) == 2
         names = {r.name for r in rows}
         assert names == {"Alice", "Bob"}
+        by_name = {r.name: r for r in rows}
+        assert by_name["Alice"].mood == "curious"
+        assert by_name["Alice"].openness_to_ads == 4
+        assert by_name["Bob"].mood == "relaxed"
+        assert by_name["Bob"].openness_to_ads == 2
+
+    def test_defaults_when_fields_omitted(self, db_session: Session):
+        set_db_session(db_session)
+        sim = _make_sim(db_session)
+
+        consumers_data = [
+            {
+                "name": "Charlie",
+                "age": 30,
+                "gender": "male",
+                "income_level": "low",
+                "interests": ["cooking"],
+                "intent": "browsing",
+                "location": "Denver",
+            },
+        ]
+
+        result = create_consumers._tool_func(
+            simulation_id=sim.id, consumers=consumers_data
+        )
+        assert "Created 1 consumers" in result
+
+        row = db_session.query(Consumer).filter_by(simulation_id=sim.id).first()
+        assert row.mood == "neutral"
+        assert row.openness_to_ads == 3
 
 
 class TestCreateWebsites:
@@ -89,12 +123,14 @@ class TestCreateCampaigns:
             {
                 "campaign_name": "Nike Reach",
                 "product_description": "Running shoes for everyone",
+                "creative": "Every finish line starts with a single step — lace up",
                 "goal": "reach",
                 "total_budget": 1000.0,
             },
             {
                 "campaign_name": "Adidas Quality",
                 "product_description": "Premium trainers",
+                "creative": "73% of athletes chose comfort over hype — here's why",
                 "goal": "quality",
                 "total_budget": 500.0,
             },

@@ -55,6 +55,8 @@ class ConsumerResponse(BaseModel):
     income_level: str
     interests: list[str]
     intent: str
+    mood: str
+    openness_to_ads: int
     location: str
 
     model_config = {"from_attributes": True}
@@ -80,6 +82,7 @@ class CampaignResponse(BaseModel):
     id: str
     campaign_name: str
     product_description: str
+    creative: str
     goal: str
     total_budget: float
     remaining_budget: float

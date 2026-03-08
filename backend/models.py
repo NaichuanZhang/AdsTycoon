@@ -44,6 +44,8 @@ class Consumer(Base):
     income_level: Mapped[str] = mapped_column(String, nullable=False)
     interests: Mapped[list] = mapped_column(JSON, nullable=False)
     intent: Mapped[str] = mapped_column(String, nullable=False)
+    mood: Mapped[str] = mapped_column(String, nullable=False, default="neutral")
+    openness_to_ads: Mapped[int] = mapped_column(Integer, nullable=False, default=3)
     location: Mapped[str] = mapped_column(String, nullable=False)
 
     simulation: Mapped["Simulation"] = relationship(back_populates="consumers")
@@ -69,6 +71,7 @@ class Campaign(Base):
     simulation_id: Mapped[str] = mapped_column(ForeignKey("simulations.id"), nullable=False)
     campaign_name: Mapped[str] = mapped_column(String, nullable=False)
     product_description: Mapped[str] = mapped_column(String, nullable=False)
+    creative: Mapped[str] = mapped_column(String, nullable=False)
     goal: Mapped[str] = mapped_column(String, nullable=False)
     total_budget: Mapped[float] = mapped_column(Float, nullable=False)
     remaining_budget: Mapped[float] = mapped_column(Float, nullable=False)

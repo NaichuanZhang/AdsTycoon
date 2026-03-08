@@ -36,7 +36,8 @@ def create_consumers(simulation_id: str, consumers: list[dict]) -> str:
         consumers: List of consumer dicts, each with keys:
             name (str), age (int), gender (str), income_level (str: low/medium/high),
             interests (list[str]), intent (str: browsing/researching/ready to buy),
-            location (str).
+            mood (str: relaxed/focused/impatient/curious/skeptical),
+            openness_to_ads (int: 1-5), location (str).
 
     Returns:
         A confirmation message with the count of consumers created.
@@ -58,6 +59,8 @@ def create_consumers(simulation_id: str, consumers: list[dict]) -> str:
                 income_level=c["income_level"],
                 interests=c["interests"],
                 intent=c["intent"],
+                mood=c.get("mood", "neutral"),
+                openness_to_ads=c.get("openness_to_ads", 3),
                 location=c["location"],
             )
             db.add(consumer)
@@ -117,6 +120,7 @@ def create_campaigns(simulation_id: str, campaigns: list[dict]) -> str:
         simulation_id: The simulation UUID to attach campaigns to.
         campaigns: List of campaign dicts, each with keys:
             campaign_name (str), product_description (str),
+            creative (str: marketing creative concept),
             goal (str: reach/quality), total_budget (float).
 
     Returns:
@@ -136,6 +140,7 @@ def create_campaigns(simulation_id: str, campaigns: list[dict]) -> str:
                 simulation_id=simulation_id,
                 campaign_name=camp["campaign_name"],
                 product_description=camp["product_description"],
+                creative=camp["creative"],
                 goal=camp["goal"],
                 total_budget=budget,
                 remaining_budget=budget,

@@ -41,6 +41,7 @@ def get_campaign(campaign_id: str) -> str:
     return (
         f"Campaign: {campaign.campaign_name}\n"
         f"Product: {campaign.product_description}\n"
+        f"Creative: {campaign.creative}\n"
         f"Goal: {campaign.goal}\n"
         f"Total Budget: ${campaign.total_budget:.2f}\n"
         f"Remaining Budget: ${campaign.remaining_budget:.2f}"

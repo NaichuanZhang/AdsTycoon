@@ -44,3 +44,17 @@ class TestSeederSystemPrompt:
     def test_system_prompt_mentions_reach_and_quality(self):
         assert "reach" in SYSTEM_PROMPT.lower()
         assert "quality" in SYSTEM_PROMPT.lower()
+
+    def test_system_prompt_mentions_personality_traits(self):
+        prompt_lower = SYSTEM_PROMPT.lower()
+        assert "mood" in prompt_lower
+        assert "openness_to_ads" in prompt_lower
+        assert "browsing" in prompt_lower
+        assert "researching" in prompt_lower
+        assert "ready to buy" in prompt_lower
+
+    def test_system_prompt_mentions_creative_rules(self):
+        prompt_lower = SYSTEM_PROMPT.lower()
+        assert "creative" in prompt_lower
+        assert "hook" in prompt_lower
+        assert "myth busting" in prompt_lower

@@ -14,7 +14,8 @@ def _setup_auction(db: Session):
 
     consumer = Consumer(
         simulation_id=sim.id, name="Alice", age=25, gender="female",
-        income_level="high", interests=["tech"], intent="browsing", location="NYC",
+        income_level="high", interests=["tech"], intent="browsing",
+        mood="curious", openness_to_ads=4, location="NYC",
     )
     website = Website(
         simulation_id=sim.id, name="TechCrunch", page_context="AI article",
@@ -22,6 +23,7 @@ def _setup_auction(db: Session):
     )
     campaign = Campaign(
         simulation_id=sim.id, campaign_name="Nike", product_description="Shoes",
+        creative="Just do it — every step counts",
         goal="reach", total_budget=100.0, remaining_budget=100.0,
     )
     db.add_all([consumer, website, campaign])

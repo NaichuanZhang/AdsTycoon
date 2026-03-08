@@ -136,6 +136,8 @@ def _consumer_profile_text(consumer: Consumer) -> str:
         f"Income: {consumer.income_level}\n"
         f"Interests: {', '.join(consumer.interests)}\n"
         f"Intent: {consumer.intent}\n"
+        f"Mood: {consumer.mood}\n"
+        f"Openness to Ads: {consumer.openness_to_ads}/5\n"
         f"Location: {consumer.location}"
     )
 

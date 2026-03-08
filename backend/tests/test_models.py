@@ -20,6 +20,8 @@ def _make_consumer(db: Session, sim_id: str) -> Consumer:
         income_level="medium",
         interests=["tech", "sports"],
         intent="browsing",
+        mood="curious",
+        openness_to_ads=4,
         location="NYC",
     )
     db.add(c)
@@ -47,6 +49,7 @@ def _make_campaign(db: Session, sim_id: str) -> Campaign:
         simulation_id=sim_id,
         campaign_name="Nike Reach",
         product_description="Running shoes ad",
+        creative="Every finish line starts with a single step — lace up",
         goal="reach",
         total_budget=1000.0,
         remaining_budget=1000.0,
@@ -90,6 +93,26 @@ class TestConsumerModel:
         assert c.id is not None
         assert c.simulation_id == sim.id
         assert c.interests == ["tech", "sports"]
+        assert c.mood == "curious"
+        assert c.openness_to_ads == 4
+
+    def test_consumer_defaults(self, db_session: Session):
+        sim = _make_simulation(db_session)
+        c = Consumer(
+            simulation_id=sim.id,
+            name="Default User",
+            age=30,
+            gender="male",
+            income_level="medium",
+            interests=["reading"],
+            intent="browsing",
+            location="Chicago",
+        )
+        db_session.add(c)
+        db_session.commit()
+        db_session.refresh(c)
+        assert c.mood == "neutral"
+        assert c.openness_to_ads == 3
 
     def test_consumer_relationship(self, db_session: Session):
         sim = _make_simulation(db_session)

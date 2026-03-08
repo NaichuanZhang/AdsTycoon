@@ -16,6 +16,8 @@ def _consumer_profile_text(consumer: Consumer) -> str:
         f"Income: {consumer.income_level}\n"
         f"Interests: {', '.join(consumer.interests)}\n"
         f"Intent: {consumer.intent}\n"
+        f"Mood: {consumer.mood}\n"
+        f"Openness to Ads: {consumer.openness_to_ads}/5\n"
         f"Location: {consumer.location}"
     )
 
@@ -79,7 +81,7 @@ def run_single_auction(db: Session, simulation_id: str) -> Auction:
                 auction_id=auction.id,
                 consumer_profile=consumer_text,
                 website_context=website_text,
-                ad_description=winner_campaign.product_description,
+                ad_description=winner_campaign.creative,
                 db_session=db,
             )
 

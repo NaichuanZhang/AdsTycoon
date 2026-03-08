@@ -80,9 +80,13 @@ class TestConsumerResponse:
             income_level="high",
             interests=["tech"],
             intent="browsing",
+            mood="curious",
+            openness_to_ads=4,
             location="NYC",
         )
         assert c.name == "Alice"
+        assert c.mood == "curious"
+        assert c.openness_to_ads == 4
 
 
 class TestSimulationResponse:
@@ -107,6 +111,7 @@ class TestCampaignResponse:
             id="abc",
             campaign_name="Nike",
             product_description="Shoes",
+            creative="Just do it — every step counts",
             goal="reach",
             total_budget=1000.0,
             remaining_budget=800.0,

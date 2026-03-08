@@ -37,6 +37,7 @@ def get_campaign(sim_id: str, campaign_id: str, db: Session = Depends(get_db)):
         id=campaign.id,
         campaign_name=campaign.campaign_name,
         product_description=campaign.product_description,
+        creative=campaign.creative,
         goal=campaign.goal,
         total_budget=campaign.total_budget,
         remaining_budget=campaign.remaining_budget,

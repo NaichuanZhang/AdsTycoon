@@ -22,6 +22,7 @@ def _setup_auction(db: Session):
     )
     campaign = Campaign(
         simulation_id=sim.id, campaign_name="Nike", product_description="Shoes",
+        creative="Just do it — every step counts",
         goal="reach", total_budget=100.0, remaining_budget=100.0,
     )
     db.add_all([consumer, website, campaign])

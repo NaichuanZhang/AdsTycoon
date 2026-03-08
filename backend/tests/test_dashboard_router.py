@@ -13,7 +13,8 @@ def _populate(db: Session):
 
     consumer = Consumer(
         simulation_id=sim.id, name="Alice", age=25, gender="female",
-        income_level="high", interests=["tech"], intent="browsing", location="NYC",
+        income_level="high", interests=["tech"], intent="browsing",
+        mood="curious", openness_to_ads=4, location="NYC",
     )
     website = Website(
         simulation_id=sim.id, name="TechCrunch", page_context="AI article",
@@ -21,10 +22,12 @@ def _populate(db: Session):
     )
     camp1 = Campaign(
         simulation_id=sim.id, campaign_name="Nike", product_description="Shoes",
+        creative="Just do it — every step counts",
         goal="reach", total_budget=100.0, remaining_budget=90.0,
     )
     camp2 = Campaign(
         simulation_id=sim.id, campaign_name="Adidas", product_description="Trainers",
+        creative="73% of athletes chose comfort over hype",
         goal="quality", total_budget=50.0, remaining_budget=50.0,
     )
     db.add_all([consumer, website, camp1, camp2])

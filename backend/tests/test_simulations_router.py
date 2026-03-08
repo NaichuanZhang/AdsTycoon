@@ -19,6 +19,7 @@ def _seed_manually(db: Session, sim_id: str):
     ))
     db.add(Campaign(
         simulation_id=sim_id, campaign_name="Nike", product_description="Shoes",
+        creative="Just do it — every step counts",
         goal="reach", total_budget=1000.0, remaining_budget=1000.0,
     ))
     db.commit()

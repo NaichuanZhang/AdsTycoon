@@ -43,7 +43,13 @@ behaviors and spending tendencies. Examples:
   Categories include: fashion, beauty, luxury brands, shopping, social media, streetwear,
   automotive, cars, motorsports, electric vehicles, real estate, property investing,
   home design, architecture, finance, travel, fitness, technology, cooking, photography, gaming.
-- **intent:** Always an empty string "".
+- **intent:** "browsing" (~50%) / "researching" (~30%) / "ready to buy" (~20%).
+  Correlate with persona: students and casual browsers skew toward "browsing",
+  hobbyists and tech enthusiasts toward "researching", high-income shoppers toward "ready to buy".
+- **mood:** "relaxed" (~30%) / "focused" (~20%) / "impatient" (~15%) / "curious" (~20%) / "skeptical" (~15%).
+  Affects ad receptiveness: relaxed/curious consumers are more open, impatient/skeptical are less.
+- **openness_to_ads:** Integer 1-5, bell-curve distribution (10%/20%/40%/20%/10%).
+  Tech-savvy personas skew lower (1-2), shopping-oriented personas skew higher (4-5).
 - **location:** A realistic US city. Use ONLY these cities: New York, Los Angeles, Chicago,
   Houston, Phoenix, San Francisco, Seattle, Austin, Miami, Denver, Boston, Atlanta, Dallas,
   San Diego, Portland.
@@ -71,6 +77,15 @@ include off-target consumers for realistic noise.
 ## Campaign Rules
 - Create campaigns that follow the scenario's strategy requirements.
 - If the scenario mentions "reach vs quality", create campaigns with both goals.
+
+## Creative Rules
+- Each campaign MUST include a `creative` field — a short marketing creative concept.
+- Derive the creative from the product description.
+- Use a hook type: myth busting, question, statistic, or storytelling.
+- Keep it concise (~10-20 words).
+- Examples: "Myth: sustainable fashion can't be luxurious — watch this transformation",
+  "What if your morning coffee could fund a rainforest?", "73% of runners improved their
+  pace — here's the shoe they wore".
 
 ## Budget Rules
 - Budgets MUST be proportional to the number of auction rounds.
